@@ -93,7 +93,7 @@ function Auth({ onLoginSuccess }) {
                 <input 
                   type="text" 
                   className="form-control border-0 bg-white bg-opacity-10 text-white shadow-none placeholder-light" 
-                  placeholder="مثال: د. أحمد عمر"
+                  placeholder=""
                   required 
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
