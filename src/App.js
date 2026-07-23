@@ -12,6 +12,7 @@ const API_URL = 'https://hu-backend-nltw.onrender.com/api/students';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [activePage, setActivePage] = useState('dashboard');
   
   // 🔹 1. تحميل البيانات المخبأة فوراً لمنع اختفاء البيانات عند التحديث (Refresh)
@@ -57,6 +58,7 @@ function App() {
 
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
+    setShowAuthModal(false);
     fetchStudents();
   };
 
@@ -85,10 +87,6 @@ function App() {
     setActivePage('students');
   };
 
-  if (!isAuthenticated) {
-    return <Auth onLoginSuccess={handleLoginSuccess} />;
-  }
-
   return (
     <div 
       dir="rtl" 
@@ -103,7 +101,29 @@ function App() {
 
       {/* المحتوى الرئيسي المتجاوب لللابتوب والموبايل */}
       <div className="flex-grow-1 p-2 p-md-4" style={{ overflowX: 'hidden', width: '100%' }}>
-        <TopNavbar title="نظام إدارة ومتابعة الدراسات العليا" onLogout={handleLogout} />
+        
+        {/* 🔹 بطاقة تنبيه لطلب تسجيل الدخول للحفظ السحابي عند استخدام وضع التجربة */}
+        {!isAuthenticated && (
+          <div className="alert alert-warning alert-dismissible fade show d-flex align-items-center justify-content-between shadow-sm border-0 mb-3" role="alert" style={{ borderRadius: '10px' }}>
+            <div>
+              <i className="bi bi-exclamation-triangle-fill me-2 fs-5 text-warning"></i>
+              <strong>وضع التجربة:</strong> أنت تستخدم النظام كزائر. يرجى تسجيل الدخول لضمان حفظ بياناتك سحابياً.
+            </div>
+            <button 
+              className="btn btn-primary btn-sm ms-3 fw-bold px-3" 
+              onClick={() => setShowAuthModal(true)}
+            >
+              <i className="bi bi-box-arrow-in-right me-1"></i> تسجيل الدخول
+            </button>
+          </div>
+        )}
+
+        <TopNavbar 
+          title="برنامج الإشراف الإلكتروني" 
+          onLogout={isAuthenticated ? handleLogout : null} 
+          isGuest={!isAuthenticated}
+          onLoginClick={() => setShowAuthModal(true)}
+        />
 
         {loading && students.length === 0 && activePage !== 'import-export' ? (
           <div className="text-center py-5">
@@ -130,6 +150,23 @@ function App() {
           </>
         )}
       </div>
+
+      {/* 🔹 نافذة منبثقة لتسجيل الدخول عند الضغط على زر التسجيل */}
+      {showAuthModal && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '15px', overflow: 'hidden' }}>
+              <div className="modal-header bg-light">
+                <h5 className="modal-title fw-bold">تسجيل الدخول</h5>
+                <button type="button" className="btn-close ms-0 me-auto" onClick={() => setShowAuthModal(false)}></button>
+              </div>
+              <div className="modal-body p-0">
+                <Auth onLoginSuccess={handleLoginSuccess} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
